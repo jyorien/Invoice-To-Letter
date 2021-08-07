@@ -6,13 +6,13 @@ const fs = require("fs");
 const ENDPOINT = process.env.ENDPOINT
 const API_KEY = process.env.API_KEY
 
-const client = new FormRecognizerClient(ENDPOINT, new AzureKeyCredential(API_KEY))
-
 const path = "./images/word-invoice-template.png"
-const readStream = fs.createReadStream(path)
+const client = new FormRecognizerClient(ENDPOINT, new AzureKeyCredential(API_KEY))
 
 class FormRecogniser {
     async recognizeInvoices(req,res) {
+
+        const readStream = fs.createReadStream(path)
 
         const poller = await client.beginRecognizeInvoices(readStream, {
             onProgress: (state) => {
@@ -26,26 +26,26 @@ class FormRecogniser {
         }
     
         // Helper function to print fields.
-        function fieldToString(field) {
-            const {
-                name,
-                valueType,
-                value,
-                confidence
-            } = field;
-            return `${name} (${valueType}): '${value}' with confidence ${confidence}'`;
-        }
+        // function fieldToString(field) {
+        //     const {
+        //         name,
+        //         valueType,
+        //         value,
+        //         confidence
+        //     } = field;
+        //     return `${name} (${valueType}): '${value}' with confidence ${confidence}'`;
+        // }
     
     
-        console.log("Invoice fields:");
+        // console.log("Invoice fields:");
         var itemJsonResponse = {}
     
     
-        for (const [name, field] of Object.entries(invoice.fields)) {
-            if (field.valueType !== "array" && field.valueType !== "object") {
-                console.log(`- ${name} ${fieldToString(field)}`);
-            }
-        }
+        // for (const [name, field] of Object.entries(invoice.fields)) {
+        //     if (field.valueType !== "array" && field.valueType !== "object") {
+        //         console.log(`- ${name} ${fieldToString(field)}`);
+        //     }
+        // }
     
         let idx = 0;
     
@@ -66,33 +66,17 @@ class FormRecogniser {
                 "Tax",
                 "Amount"
             ]
-                // .map((fieldName) => value[fieldName])
-    
             var filteredFields = subFields.filter((field) => value[field] !== undefined)
         
             filteredFields.forEach((val) => {
-                console.log(val)
-                console.log(value[val]["valueData"]["text"])
                 const list = itemJsonResponse[idx]
                 list[val] = value[val]["valueData"]["text"]
-                // value[`${value[val]["valueData"]["text"]}`
             })
-            
-        
-    
-                
-            // console.log(
-            //     [
-            //         `  - Item #${idx}`,
-            //         // Now we will convert those fields into strings to display
-            //         ...subFields.map((field) => `    - ${fieldToString(field)}`)
-            //     ].join("\n")
-            // );
-            
+                    
             idx+=1
         }
         console.log(itemJsonResponse)
-        res.setHeader('Content-Type', 'application/json');
+        // res.setHeader('Content-Type', 'application/json');
         res.send(itemJsonResponse)
     
     }
