@@ -1,6 +1,8 @@
 require('dotenv').config({path: '../.env'})
 const { FormRecognizerClient, AzureKeyCredential } = require("@azure/ai-form-recognizer");
 const fs = require("fs");
+const PDFDocument = require('pdfkit')
+const archiver = require("archiver")
 
 // create .env file and define 'ENDPOINT' and 'API_KEY'
 const ENDPOINT = process.env.ENDPOINT
@@ -79,7 +81,7 @@ class FormRecogniser {
         }
         console.log(itemJsonResponse)
         dataToInvoice(itemJsonResponse)
-        
+
         function dataToInvoice(jsonData) {
             var filteredData = Object.values(jsonData).map((value) => {
                 return {
@@ -87,14 +89,42 @@ class FormRecogniser {
                     "Amount": value.Amount
                 }
             })
-            
+            var index = 0
             filteredData.forEach((value) => {
                 var template = `Dear Sir/Mam, we would like to request a payment of $${value.Amount} for ${value.Description}`
                 console.log("template",template)
+                // create document
+                const doc = new PDFDocument()
+
+                doc.pipe(fs.createWriteStream(`files/output${index}.pdf`))
+                doc
+                    .fontSize(25)
+                    .text(template)  
+                    .end()
+                    index+=1       
             })
+
+            const output = fs.createWriteStream(`files/letters.zip`)
+            const archive = archiver('zip', {zlib: {level:9}})
+            output.on('close',()=>{
+                // on stream close
+                console.log("closed")
+                res.download(`files/letters.zip`)
+            
+            
+            })
+            for (let i = 0; i < index; i++) {
+                archive.file(`files/output${i}.pdf`,{name: `files/output${i}.pdf`})
+            }
+            archive.finalize()
+            archive.pipe(output)
+
+
+            
+
         }
         // res.setHeader('Content-Type', 'application/json');
-        res.send(itemJsonResponse)
+        // res.send(itemJsonResponse)
     
     }
     
