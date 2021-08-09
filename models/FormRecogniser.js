@@ -10,11 +10,13 @@ const path = "./images/word-invoice-template.png"
 const client = new FormRecognizerClient(ENDPOINT, new AzureKeyCredential(API_KEY))
 
 class FormRecogniser {
+
     async recognizeInvoices(req,res) {
 
-        const readStream = fs.createReadStream(path)
+        var url = req.body.url
+        console.log("url in body:",url)
 
-        const poller = await client.beginRecognizeInvoices(readStream, {
+        const poller = await client.beginRecognizeInvoicesFromUrl(url, {
             onProgress: (state) => {
                 console.log(`status: ${state.status}`);
             }
