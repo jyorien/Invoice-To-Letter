@@ -12,7 +12,9 @@ const path = "./images/word-invoice-template.png"
 const client = new FormRecognizerClient(ENDPOINT, new AzureKeyCredential(API_KEY))
 
 class FormRecogniser {
-
+    downloadLetters(req,res) {
+        res.download(`files/letters.zip`)
+    }
     async recognizeInvoices(req,res) {
 
         var url = req.body.url
@@ -109,6 +111,7 @@ class FormRecogniser {
             output.on('close',()=>{
                 // on stream close
                 console.log("closed")
+                res.setHeader('Content-Type', 'application/download');
                 res.download(`files/letters.zip`)
             
             
