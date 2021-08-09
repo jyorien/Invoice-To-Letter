@@ -78,14 +78,27 @@ class FormRecogniser {
             idx+=1
         }
         console.log(itemJsonResponse)
+        dataToInvoice(itemJsonResponse)
+        
+        function dataToInvoice(jsonData) {
+            var filteredData = Object.values(jsonData).map((value) => {
+                return {
+                    "Description": value.Description,
+                    "Amount": value.Amount
+                }
+            })
+            
+            filteredData.forEach((value) => {
+                var template = `Dear Sir/Mam, we would like to request a payment of $${value.Amount} for ${value.Description}`
+                console.log("template",template)
+            })
+        }
         // res.setHeader('Content-Type', 'application/json');
         res.send(itemJsonResponse)
     
     }
     
-    // recognizeInvoices().catch((err) => {
-    //     console.error("The sample encountered an error:", err);
-    // });
+    
 }
 module.exports = FormRecogniser
 
