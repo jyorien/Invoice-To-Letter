@@ -13,7 +13,7 @@ const client = new FormRecognizerClient(ENDPOINT, new AzureKeyCredential(API_KEY
 
 class FormRecogniser {
     downloadLetters(req,res) {
-        res.download(`files/letters.zip`)
+        res.download(`letters.zip`)
     }
     async recognizeInvoices(req,res) {
 
@@ -98,7 +98,7 @@ class FormRecogniser {
                 // create document
                 const doc = new PDFDocument()
 
-                doc.pipe(fs.createWriteStream(`files/output${index}.pdf`))
+                doc.pipe(fs.createWriteStream(`output${index}.pdf`))
                 doc
                     .fontSize(25)
                     .text(template)  
@@ -106,18 +106,18 @@ class FormRecogniser {
                     index+=1       
             })
 
-            const output = fs.createWriteStream(`files/letters.zip`)
+            const output = fs.createWriteStream(`letters.zip`)
             const archive = archiver('zip', {zlib: {level:9}})
             output.on('close',()=>{
                 // on stream close
                 console.log("closed")
                 res.setHeader('Content-Type', 'application/download');
-                res.download(`files/letters.zip`)
+                res.download(`letters.zip`)
             
             
             })
             for (let i = 0; i < index; i++) {
-                archive.file(`files/output${i}.pdf`,{name: `files/output${i}.pdf`})
+                archive.file(`output${i}.pdf`,{name: `output${i}.pdf`})
             }
             archive.finalize()
             archive.pipe(output)
